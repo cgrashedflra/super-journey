@@ -5,7 +5,6 @@ import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 import { Geist } from "next/font/google";
 import { cn } from "@/lib/utils";
-import Navbar from "@/components/navigation/navbar";
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
@@ -43,7 +42,6 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-          <Navbar />
           {children}
         </ThemeProvider>
       </body>
