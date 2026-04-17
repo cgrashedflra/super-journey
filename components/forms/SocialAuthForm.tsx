@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 
 import { Button } from "../ui/button";
+import { signIn } from "next-auth/react";
 
 const SocialAuthForm = () => {
   const buttonClass =
@@ -8,7 +11,7 @@ const SocialAuthForm = () => {
 
   return (
     <div className="mt-10 flex flex-wrap gap-2.5">
-      <Button className={buttonClass}>
+      <Button className={buttonClass} onClick={() => signIn("github")}>
         <Image
           src="/icons/github.svg"
           alt="Github Logo"
