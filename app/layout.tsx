@@ -41,6 +41,14 @@ const RootLayout = async ({ children }: Readonly<{ children: React.ReactNode }>)
       suppressHydrationWarning
       className={cn("antialiased", inter.className, spaceGrotesk.variable, "font-sans", geist.variable)}
     >
+      <head>
+        <link
+          rel="stylesheet"
+          type="text/css"
+          href="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/devicon.min.css"
+        />
+      </head>
+
       <SessionProvider session={session}>
         <body className="flex min-h-full flex-col">
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
