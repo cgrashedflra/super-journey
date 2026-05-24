@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import QuestionCard from "@/components/cards/QuestionCard";
 import HomeFilter from "@/components/filters/HomeFilter";
 import LocalSearch from "@/components/search/LocalSearch";
 import { Button } from "@/components/ui/button";
@@ -12,9 +13,14 @@ const questions = [
     description: "I want to learn React, can anyone help me?",
     tags: [
       { _id: "1", name: "React" },
-      { _id: "2", name: "" },
+      { _id: "2", name: "JavaScript" },
     ],
-    author: { _id: "1", name: "John Doe" },
+    author: {
+      _id: "1",
+      name: "John Doe",
+      image:
+        "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg",
+    },
     upvotes: 10,
     answers: 5,
     views: 100,
@@ -26,13 +32,18 @@ const questions = [
     description: "I want to learn JavaScript, can anyone help me?",
     tags: [
       { _id: "1", name: "JavaScript" },
-      { _id: "2", name: "" },
+      { _id: "2", name: "JavaScript" },
     ],
-    author: { _id: "1", name: "John Doe" },
+    author: {
+      _id: "1",
+      name: "John Doe",
+      image:
+        "https://static.vecteezy.com/system/resources/previews/002/002/403/non_2x/man-with-beard-avatar-character-isolated-icon-free-vector.jpg",
+    },
     upvotes: 10,
     answers: 5,
     views: 100,
-    createdAt: new Date(),
+    createdAt: new Date("2021-09-01"),
   },
 ];
 
@@ -48,13 +59,10 @@ const Home = async ({ searchParams }: SearchParams) => {
       .toLowerCase()
       .includes(query.toLowerCase());
     const matchesFilter = filter
-      ? question.tags.some(
-        (tag) => tag.name.toLowerCase() === filter.toLowerCase()
-      )
+      ? question.tags[0].name.toLowerCase() === filter.toLowerCase()
       : true;
     return matchesQuery && matchesFilter;
   });
-
 
   return (
     <>
@@ -62,7 +70,7 @@ const Home = async ({ searchParams }: SearchParams) => {
         <h1 className="h1-bold text-dark100_light900">All Questions</h1>
 
         <Button
-          className="primary-gradient min-h-[46px] px-4 py-3 !text-light-900"
+          className="primary-gradient min-h-11.5 px-4 py-3 text-light-900!"
           asChild
         >
           <Link href={ROUTES.ASK_QUESTION}>Ask a Question</Link>
@@ -72,14 +80,15 @@ const Home = async ({ searchParams }: SearchParams) => {
         <LocalSearch
           route="/"
           imgSrc="/icons/search.svg"
-          placeholder="Search a question"
+          placeholder="Search questions..."
+          otherClasses="flex-1"
           iconPosition="left"
         />
       </section>
       <HomeFilter />
       <div className="mt-10 flex w-full flex-col gap-6">
         {filteredQuestions.map((question) => (
-          <h1 key={question._id}>{question.title}</h1>
+          <QuestionCard key={question._id} question={question} />
         ))}
       </div>
     </>
