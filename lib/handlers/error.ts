@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { ZodError } from "zod";
+import { flattenError, ZodError } from "zod";
 
 import { RequestError, ValidationError } from "../http-errors";
 import logger from "../logger";
@@ -41,20 +41,16 @@ const handleError = (error: unknown, responseType: ResponseType = "server") => {
     );
   }
 
-  if (error instanceof ZodError) {
-    const fieldErrors: Record<string, string[]> = {};
-    for (const issue of error.issues) {
-      const field = issue.path[0]?.toString() ?? "_global";
-      (fieldErrors[field] ??= []).push(issue.message);
-    }
+if (error instanceof ZodError) {
+  const validationError = new ValidationError(
+    flattenError(error).fieldErrors
+  );
 
-    const validationError = new ValidationError(fieldErrors);
-
-     logger.error(
-      { err: error },
-      `Validation Error: ${validationError.message}`
-    );
-
+  logger.error(
+    { err: error },
+    `Validation Error: ${validationError.message}`
+  );
+  
     return formatResponse(
       responseType,
       validationError.statusCode,
