@@ -22,11 +22,14 @@ import {
 } from "@/components/ui/field";
 
 import { Input } from "@/components/ui/input";
+import { useRouter } from "next/navigation";
+import ROUTES from "@/constants/routes";
+import { toast } from "sonner";
 
 interface FormProps<T extends FieldValues> {
   schema: ZodType<T>;
   defaultValues: T;
-  onSubmit: (data: T) => Promise<{ success: boolean }>;
+  onSubmit: (data: T) => Promise<ActionResponse>;
   formType: "SIGN_IN" | "SIGN_UP";
 }
 
@@ -36,6 +39,7 @@ const AuthForm = <T extends FieldValues>({
   formType,
   onSubmit,
 }: FormProps<T>) => {
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof schema>>({
     resolver: standardSchemaResolver(schema),
@@ -43,8 +47,21 @@ const AuthForm = <T extends FieldValues>({
   });
 
   const handleSubmit: SubmitHandler<T> = async (data) => {
-    await onSubmit(data);
+    const result = (await onSubmit(data)) as ActionResponse;
+
+    if (result?.success) {
+      toast.success(
+        formType === "SIGN_IN"
+          ? "Signed in successfully"
+          : "Signed up successfully"
+      );
+
+      router.push(ROUTES.HOME);
+    } else {
+      toast.error(result?.error?.message ?? `Error ${result?.status}`);
+    }
   };
+
 
   const buttonText =
     formType === "SIGN_IN"
@@ -75,7 +92,7 @@ const AuthForm = <T extends FieldValues>({
                   {field.name === "email"
                     ? "Email Address"
                     : field.name.charAt(0).toUpperCase() +
-                      field.name.slice(1)}
+                    field.name.slice(1)}
                 </FieldLabel>
 
                 <Input

@@ -8,9 +8,16 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-const NavLinks = ({ isMobileNav = false }: { isMobileNav?: boolean }) => {
+
+const NavLinks = ({
+    isMobileNav = false,
+    userId,
+}: {
+    isMobileNav?: boolean;
+    userId?: string;
+}) => {
     const pathname = usePathname();
-    const userId = 1;
+
 
     return (
 

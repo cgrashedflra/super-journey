@@ -1,6 +1,6 @@
 import handleError from "@/lib/handlers/error";
 import dbConnect from "@/lib/mongoose";
-import Account from "@/database/user.model";
+import Account from "@/database/account.model";
 import { NextResponse } from "next/server";
 import { NotFoundError, ValidationError } from "@/lib/http-errors";
 import { AccountSchema } from "@/lib/validations";

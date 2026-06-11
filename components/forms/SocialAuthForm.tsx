@@ -17,6 +17,9 @@ const SocialAuthForm = () => {
         callbackUrl: ROUTES.HOME,
         redirect: true,
       });
+
+      toast.success("Signed in successfully");
+
     } catch (error) {
       console.log(error);
 
