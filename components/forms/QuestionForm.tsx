@@ -12,7 +12,7 @@ import { useRef, useTransition } from "react";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import z from 'zod';
 import TagCard from '../cards/TagCard';
-import { createQuestion } from '@/lib/action/question.action';
+import { createQuestion, editQuestion } from '@/lib/action/question.action';
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
 import ROUTES from '@/constants/routes';
@@ -23,7 +23,12 @@ const Editor = dynamic(() => import('@/components/editor'), {
     ssr: false
 })
 
-const QuestionForm = () => {
+interface Params {
+    question?: Question;
+    isEdit?: boolean;
+}
+
+const QuestionForm = ({ question, isEdit = false }: Params) => {
     const router = useRouter();
 
     const [isPending, startTransition] = useTransition();
@@ -33,9 +38,9 @@ const QuestionForm = () => {
     const form = useForm<z.infer<typeof AskQuestionSchema>>({
         resolver: standardSchemaResolver(AskQuestionSchema),
         defaultValues: {
-            title: "",
-            content: '',
-            tags: []
+            title: question?.title || "",
+            content: question?.content || "",
+            tags: question?.tags.map((tag) => tag.name) || [],
         }
     })
 
@@ -81,6 +86,24 @@ const QuestionForm = () => {
 
     const handleCreateQuestion = async (data: z.infer<typeof AskQuestionSchema>) => {
         startTransition(async () => {
+            if (isEdit && question) {
+                const result = await editQuestion({
+                    questionId: question?._id,
+                    ...data,
+                });
+
+                if (result.success) {
+                    // Handle success (e.g., redirect to the question page)
+                    toast.success("Question updated successfully!");
+                    if (result.data) router.push(ROUTES.QUESTION(result.data._id));
+
+                } else {
+                    // Handle error (e.g., show error message)
+                    toast.error("Failed to update question. Please try again.");
+                }
+
+                return;
+            }
             const result = await createQuestion(data);
 
             if (result.success) {
@@ -213,7 +236,7 @@ const QuestionForm = () => {
                             <span>Submitting</span>
                         </>
                     ) : (
-                        <>Ask A Question</>
+                        <>{isEdit ? "Update Question" : "Ask A Question"}</>
                     )}
                 </Button>
             </div>
