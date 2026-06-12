@@ -57,16 +57,16 @@ export async function signUpWithCredentials(
     );
 
     await session.commitTransaction();
-    await session.endSession();
 
     await signIn("credentials", { email, password, redirect: false });
 
     return { success: true };
   } catch (error) {
     await session.abortTransaction();
-    await session.endSession();
 
     return handleError(error) as ErrorResponse;
+  } finally {
+    await session.endSession();
   }
 }
 
