@@ -41,3 +41,11 @@ interface RouteParams{
   params: promise<Record<string, string>>;
   searchParams: promise<Record<string, string>>;
 }
+
+interface PaginatedSearchParams {
+  page?: number;
+  pageSize?: number;
+  filter?: string;
+  query?: string;
+  sort?: string;
+}
