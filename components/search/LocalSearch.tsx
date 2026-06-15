@@ -11,7 +11,7 @@ interface Props {
     route: string;
     imgSrc: string;
     placeholder: string;
-    iconPosition: "left" | "right";
+    iconPosition?: "left" | "right";
     otherClasses?: string;
 }
 
@@ -19,7 +19,7 @@ const LocalSearch = ({
     route,
     imgSrc,
     placeholder,
-    iconPosition,
+    iconPosition = "left",
     otherClasses,
 }: Props) => {
     const router = useRouter();
