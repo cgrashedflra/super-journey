@@ -1,5 +1,6 @@
 import TagCard from "@/components/cards/TagCard";
 import { Preview } from "@/components/editor/Preview";
+import AnswerForm from "@/components/forms/AnswerForm";
 import Metric from "@/components/Metric";
 import UserAvatar from "@/components/UserAvatar";
 import ROUTES from "@/constants/routes";
@@ -16,8 +17,8 @@ const QuestionDetails = async ({ params }: RouteParams) => {
     if (!success || !question) return redirect("/404");
 
 
-after(async () => {
-      await incrementViews({ questionId: id });
+    after(async () => {
+        await incrementViews({ questionId: id });
     });
 
     const { author, createdAt, answers, views, tags, content, title } = question;
@@ -86,6 +87,9 @@ after(async () => {
                     />
                 ))}
             </div>
+            <section className="my-5">
+                <AnswerForm />
+            </section>
         </>
     );
 };
