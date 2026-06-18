@@ -5,7 +5,7 @@ import { MDXEditorMethods } from '@mdxeditor/editor'
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { AnswerSchema, AskQuestionSchema } from "@/lib/validations";
+import { AnswerSchema } from "@/lib/validations";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Controller, useForm } from "react-hook-form";
 import { useRef, useState, useTransition } from "react";
@@ -14,6 +14,7 @@ import z from 'zod';
 import { toast } from "sonner";
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { createAnswer } from '@/lib/action/answer.action';
 
 
 const Editor = dynamic(() => import('@/components/editor'), {
@@ -21,8 +22,8 @@ const Editor = dynamic(() => import('@/components/editor'), {
     ssr: false
 })
 
-const AnswerForm = () => {
-    const [isSubmitting, setIsSubmitting] = useState(false);
+const AnswerForm = ({ questionId }: { questionId: string }) => {
+    const [isAnswering, startAnsweringTransition] = useTransition();
     const [isAISubmitting, setIsAISubmitting] = useState(false);
 
     const editorRef = useRef<MDXEditorMethods>(null)
@@ -35,39 +36,21 @@ const AnswerForm = () => {
     });
 
     const handleCreateAnswer = async (values: z.infer<typeof AnswerSchema>) => {
-        // startTransition(async () => {
-        //     if (isEdit && question) {
-        //         const result = await editQuestion({
-        //             questionId: question?._id,
-        //             ...data,
-        //         });
+        startAnsweringTransition(async () => {
 
-        //         if (result.success) {
-        //             // Handle success (e.g., redirect to the question page)
-        //             toast.success("Question updated successfully!");
-        //             if (result.data) router.push(ROUTES.QUESTION(result.data._id));
+            const result = await createAnswer({
+                questionId,
+                content: values.content,
+            });
 
-        //         } else {
-        //             // Handle error (e.g., show error message)
-        //             toast.error("Failed to update question. Please try again.");
-        //         }
-
-        //         return;
-        //     }
-        //     const result = await createQuestion(data);
-
-        //     if (result.success) {
-        //         // Handle success (e.g., redirect to the question page)
-        //         toast.success("Question created successfully!");
-        //         if (result.data) router.push(ROUTES.QUESTION(result.data._id));
-
-        //     } else {
-        //         // Handle error (e.g., show error message)
-        //         toast.error("Failed to create question. Please try again.");
-        //     }
-        // });
+            if (result.success) {
+                form.reset();
+                toast.success("Answer posted successfully!");
+            } else {
+                toast.error("Failed to post answer. Please try again.");
+            }
+        });
     };
-
 
     return (
         <div>
@@ -134,7 +117,7 @@ const AnswerForm = () => {
 
                 <div className="flex justify-end">
                     <Button type="submit" className="primary-gradient w-fit">
-                        {isSubmitting ? (
+                        {isAnswering ? (
                             <>
                                 <ReloadIcon className="mr-2 size-4 animate-spin" />
                                 Posting...
