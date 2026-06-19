@@ -1,9 +1,11 @@
+import GetAllAnswers from "@/components/answers/GetAllAnswers";
 import TagCard from "@/components/cards/TagCard";
 import { Preview } from "@/components/editor/Preview";
 import AnswerForm from "@/components/forms/AnswerForm";
 import Metric from "@/components/Metric";
 import UserAvatar from "@/components/UserAvatar";
 import ROUTES from "@/constants/routes";
+import { getAnswers } from "@/lib/action/answer.action";
 import { getQuestion, incrementViews } from "@/lib/action/question.action";
 import { formatNumber, getTimeStamp } from "@/lib/utils";
 import Link from "next/link";
@@ -19,6 +21,17 @@ const QuestionDetails = async ({ params }: RouteParams) => {
 
     after(async () => {
         await incrementViews({ questionId: id });
+    });
+
+    const {
+        success: areAnswersLoaded,
+        data: answersResult,
+        error: answersError,
+    } = await getAnswers({
+        questionId: id,
+        page: 1,
+        pageSize: 10,
+        filter: "latest",
     });
 
     const { author, createdAt, answers, views, tags, content, title } = question;
@@ -87,6 +100,14 @@ const QuestionDetails = async ({ params }: RouteParams) => {
                     />
                 ))}
             </div>
+            <section className="my-5">
+                <GetAllAnswers
+                    data={answersResult?.answers}
+                    success={areAnswersLoaded}
+                    error={answersError}
+                    totalAnswers={answersResult?.totalAnswers || 0}
+                />
+            </section>
             <section className="my-5">
                 <AnswerForm questionId={question._id} />
             </section>
