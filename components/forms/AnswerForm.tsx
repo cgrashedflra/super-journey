@@ -1,10 +1,10 @@
 "use client";
+
 import dynamic from 'next/dynamic'
 import { MDXEditorMethods } from '@mdxeditor/editor'
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import { AnswerSchema } from "@/lib/validations";
 import { standardSchemaResolver } from "@hookform/resolvers/standard-schema";
 import { Controller, useForm } from "react-hook-form";
@@ -12,19 +12,28 @@ import { useRef, useState, useTransition } from "react";
 import { ReloadIcon } from "@radix-ui/react-icons";
 import z from 'zod';
 import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { createAnswer } from '@/lib/action/answer.action';
+import { useSession } from 'next-auth/react';
+import { api } from '@/lib/api';
 
 
 const Editor = dynamic(() => import('@/components/editor'), {
     // Make sure we turn SSR off
+
     ssr: false
 })
 
-const AnswerForm = ({ questionId }: { questionId: string }) => {
+interface props {
+    questionId: string,
+    questionTitle: string,
+    questionContent: string
+}
+
+const AnswerForm = ({ questionId, questionTitle, questionContent }: props) => {
     const [isAnswering, startAnsweringTransition] = useTransition();
     const [isAISubmitting, setIsAISubmitting] = useState(false);
+    const session = useSession();
 
     const editorRef = useRef<MDXEditorMethods>(null)
 
@@ -46,10 +55,53 @@ const AnswerForm = ({ questionId }: { questionId: string }) => {
             if (result.success) {
                 form.reset();
                 toast.success("Answer posted successfully!");
+                if (editorRef.current) {
+                    editorRef.current.setMarkdown("");
+                }
             } else {
                 toast.error("Failed to post answer. Please try again.");
             }
         });
+    };
+
+    const generateAIAnswer = async () => {
+        if (session.status !== "authenticated") {
+            toast.error("Please sign in to generate an AI answer.");
+            return;
+        }
+
+        setIsAISubmitting(true);
+
+        const userAnswer = editorRef.current?.getMarkdown();
+
+        try {
+            const { success, data, error } = await api.ai.getAnswer(
+                questionTitle,
+                questionContent,
+                userAnswer
+            );
+
+            if (!success) {
+                toast.error(error || "Failed to generate AI answer. Please try again.");
+                return;
+            }
+
+            const formattedAnswer = data.replace(/<br>/g, " ").toString().trim();
+
+            if (editorRef.current) {
+                editorRef.current.setMarkdown(formattedAnswer);
+
+                form.setValue("content", formattedAnswer);
+                form.trigger("content");
+            }
+
+            toast.success("AI answer generated successfully!");
+        } catch (error) {
+            console.error("Error generating AI answer:", error);
+            toast.error("An error occurred while generating the AI answer. Please try again.");
+        } finally {
+            setIsAISubmitting(false);
+        }
     };
 
     return (
@@ -61,6 +113,7 @@ const AnswerForm = ({ questionId }: { questionId: string }) => {
                 <Button
                     className="btn light-border-2 gap-1.5 rounded-md border px-4 py-2.5 text-primary-500 shadow-none dark:text-primary-500"
                     disabled={isAISubmitting}
+                    onClick={generateAIAnswer}
                 >
                     {isAISubmitting ? (
                         <>
