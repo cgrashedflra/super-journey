@@ -1,3 +1,8 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { after } from "next/server";
+import { Suspense } from "react";
+
 import GetAllAnswers from "@/components/answers/GetAllAnswers";
 import TagCard from "@/components/cards/TagCard";
 import { Preview } from "@/components/editor/Preview";
@@ -8,21 +13,18 @@ import Votes from "@/components/votes/Votes";
 import ROUTES from "@/constants/routes";
 import { getAnswers } from "@/lib/action/answer.action";
 import { getQuestion, incrementViews } from "@/lib/action/question.action";
+import { hasVoted } from "@/lib/action/vote.action";
 import { formatNumber, getTimeStamp } from "@/lib/utils";
-import Link from "next/link";
-import { redirect } from "next/navigation";
-import { after } from "next/server";
 
 const QuestionDetails = async ({ params }: RouteParams) => {
     const { id } = await params;
     const { success, data: question } = await getQuestion({ questionId: id });
 
-    if (!success || !question) return redirect("/404");
-
-
     after(async () => {
         await incrementViews({ questionId: id });
     });
+
+    if (!success || !question) return redirect("/404");
 
     const {
         success: areAnswersLoaded,
@@ -35,6 +37,11 @@ const QuestionDetails = async ({ params }: RouteParams) => {
         filter: "latest",
     });
 
+    const hasVotedPromise = hasVoted({
+        targetId: question._id,
+        targetType: "question",
+    });
+
     const { author, createdAt, answers, views, tags, content, title } = question;
 
     return (
@@ -45,7 +52,7 @@ const QuestionDetails = async ({ params }: RouteParams) => {
                         <UserAvatar
                             id={author._id}
                             name={author.name}
-                            className="size-5.5"
+                            className="size-[22px]"
                             fallbackClassName="text-[10px]"
                         />
                         <Link href={ROUTES.PROFILE(author._id)}>
@@ -56,12 +63,15 @@ const QuestionDetails = async ({ params }: RouteParams) => {
                     </div>
 
                     <div className="flex justify-end">
-                        <Votes
-                            upvotes={question.upvotes}
-                            downvotes={question.downvotes}
-                            hasupvoted={true}
-                            hasdownvoted={false}
-                        />
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <Votes
+                                targetType="question"
+                                upvotes={question.upvotes}
+                                downvotes={question.downvotes}
+                                targetId={question._id}
+                                hasVotedPromise={hasVotedPromise}
+                            />
+                        </Suspense>
                     </div>
                 </div>
 
@@ -106,6 +116,7 @@ const QuestionDetails = async ({ params }: RouteParams) => {
                     />
                 ))}
             </div>
+
             <section className="my-5">
                 <GetAllAnswers
                     data={answersResult?.answers}
@@ -114,8 +125,13 @@ const QuestionDetails = async ({ params }: RouteParams) => {
                     totalAnswers={answersResult?.totalAnswers || 0}
                 />
             </section>
+
             <section className="my-5">
-                <AnswerForm questionId={question._id} questionTitle={question.title} questionContent={question.content} />
+                <AnswerForm
+                    questionId={question._id}
+                    questionTitle={question.title}
+                    questionContent={question.content}
+                />
             </section>
         </>
     );
