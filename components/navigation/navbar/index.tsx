@@ -22,13 +22,17 @@ const Navbar = async () => {
 
       <div className="flex-between gap-5">
         <Theme />
+
         {session?.user?.id && (
           <UserAvatar
             id={session.user.id}
             name={session.user.name!}
             imageUrl={session.user?.image!}
+            className="rounded-full object-cover overflow-hidden"
+            fallbackClassName="text-3xl tracking-widest"
           />
         )}
+
         <MobileNavigation />
       </div>
     </nav>
