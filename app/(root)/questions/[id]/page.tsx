@@ -1,20 +1,22 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import { Suspense } from "react";
+import React, { Suspense } from "react";
 
-import GetAllAnswers from "@/components/answers/GetAllAnswers";
 import TagCard from "@/components/cards/TagCard";
 import { Preview } from "@/components/editor/Preview";
 import AnswerForm from "@/components/forms/AnswerForm";
 import Metric from "@/components/Metric";
+import SaveQuestion from "@/components/question/SaveQuestion";
 import UserAvatar from "@/components/UserAvatar";
 import Votes from "@/components/votes/Votes";
 import ROUTES from "@/constants/routes";
 import { getAnswers } from "@/lib/action/answer.action";
+import { hasSavedQuestion } from "@/lib/action/collection.action";
 import { getQuestion, incrementViews } from "@/lib/action/question.action";
 import { hasVoted } from "@/lib/action/vote.action";
 import { formatNumber, getTimeStamp } from "@/lib/utils";
+import GetAllAnswers from "@/components/answers/GetAllAnswers";
 
 const QuestionDetails = async ({ params }: RouteParams) => {
     const { id } = await params;
@@ -42,6 +44,10 @@ const QuestionDetails = async ({ params }: RouteParams) => {
         targetType: "question",
     });
 
+    const hasSavedQuestionPromise = hasSavedQuestion({
+        questionId: question._id,
+    });
+
     const { author, createdAt, answers, views, tags, content, title } = question;
 
     return (
@@ -52,7 +58,7 @@ const QuestionDetails = async ({ params }: RouteParams) => {
                         <UserAvatar
                             id={author._id}
                             name={author.name}
-                            className="size-5.5"
+                            className="size-[22px]"
                             fallbackClassName="text-[10px]"
                         />
                         <Link href={ROUTES.PROFILE(author._id)}>
@@ -62,7 +68,7 @@ const QuestionDetails = async ({ params }: RouteParams) => {
                         </Link>
                     </div>
 
-                    <div className="flex justify-end">
+                    <div className="flex items-center justify-end gap-4">
                         <Suspense fallback={<div>Loading...</div>}>
                             <Votes
                                 targetType="question"
@@ -70,6 +76,13 @@ const QuestionDetails = async ({ params }: RouteParams) => {
                                 downvotes={question.downvotes}
                                 targetId={question._id}
                                 hasVotedPromise={hasVotedPromise}
+                            />
+                        </Suspense>
+
+                        <Suspense fallback={<div>Loading...</div>}>
+                            <SaveQuestion
+                                questionId={question._id}
+                                hasSavedQuestionPromise={hasSavedQuestionPromise}
                             />
                         </Suspense>
                     </div>
