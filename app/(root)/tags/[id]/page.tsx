@@ -1,6 +1,8 @@
 import QuestionCard from "@/components/cards/QuestionCard";
 import DataRenderer from "@/components/DataRenderer";
+import CommonFilter from "@/components/filters/CommonFilter";
 import LocalSearch from "@/components/search/LocalSearch";
+import { TagFilters } from "@/constants/filters";
 import ROUTES from "@/constants/routes";
 import { EMPTY_QUESTION } from "@/constants/states";
 import { getTagQuestions } from "@/lib/action/tag.action";
@@ -25,12 +27,16 @@ const Page = async ({ params, searchParams }: RouteParams) => {
                 <h1 className="h1-bold text-dark100_light900">{tag?.name}</h1>
             </section>
 
-            <section className="mt-11">
+            <section className="mt-11 flex justify-between gap-5 max-sm:flex-col sm:items-center">
                 <LocalSearch
                     route={ROUTES.TAG(id)}
                     imgSrc="/icons/search.svg"
                     placeholder="Search questions..."
                     otherClasses="flex-1"
+                />
+                <CommonFilter
+                    filters={TagFilters}
+                    otherClasses="min-h-14 sm:min-w-42.5"
                 />
             </section>
 
