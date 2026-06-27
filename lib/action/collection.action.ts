@@ -120,13 +120,26 @@ export async function getSavedQuestions(
   const skip = (Number(page) - 1) * pageSize;
   const limit = Number(pageSize);
 
-  const filterQuery: QueryFilter<typeof Collection> = { author: userId };
+  const collectionFilterQuery: QueryFilter<typeof Collection> = { author: userId };
 
   if (query) {
-    filterQuery.$or = [
-      { title: { $regex: new RegExp(query, "i") } },
-      { content: { $regex: new RegExp(query, "i") } },
-    ];
+    const matchingQuestions = await Question.find({
+      $or: [
+        { title: { $regex: new RegExp(query, "i") } },
+        { content: { $regex: new RegExp(query, "i") } },
+      ],
+    }).select("_id");
+
+    if (matchingQuestions.length === 0) {
+      return {
+        success: true,
+        data: { collection: [], isNext: false },
+      };
+    }
+
+    collectionFilterQuery.question = {
+      $in: matchingQuestions.map((question) => question._id),
+    };
   }
 
   let sortCriteria = {};
@@ -150,9 +163,9 @@ export async function getSavedQuestions(
   }
 
   try {
-    const totalQuestions = await Question.countDocuments(filterQuery);
+    const totalQuestions = await Collection.countDocuments(collectionFilterQuery);
 
-    const questions = await Collection.find(filterQuery)
+    const questions = await Collection.find(collectionFilterQuery)
       .populate({
         path: "question",
         populate: [

@@ -10,6 +10,7 @@ import DataRenderer from "@/components/DataRenderer";
 import { EMPTY_QUESTION } from "@/constants/states";
 import CommonFilter from "@/components/filters/CommonFilter";
 import { HomePageFilters } from "@/constants/filters";
+import Pagination from "@/components/Pagination";
 
 
 
@@ -28,7 +29,7 @@ const Home = async ({ searchParams }: SearchParams) => {
     filter: filter || "",
   });
 
-  const { questions } = data || {};
+  const { questions, isNext } = data || {};
 
   return (
     <>
@@ -56,6 +57,7 @@ const Home = async ({ searchParams }: SearchParams) => {
           containerClasses="hidden max-md:flex"
         />
       </section>
+
       <HomeFilter />
 
       <DataRenderer
@@ -71,6 +73,8 @@ const Home = async ({ searchParams }: SearchParams) => {
           </div>
         )}
       />
+
+      <Pagination page={page} isNext={isNext || false} />
 
     </>
   );

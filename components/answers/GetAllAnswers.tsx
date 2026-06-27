@@ -4,12 +4,15 @@ import AnswerCard from "../cards/AnswerCard";
 import DataRenderer from "../DataRenderer";
 import CommonFilter from "../filters/CommonFilter";
 import { AnswerFilters } from "@/constants/filters";
+import Pagination from "../Pagination";
 
 interface Props extends ActionResponse<Answer[]> {
     totalAnswers: number;
+    page: number;
+    isNext: boolean;
 }
 
-const GetAllAnswers = ({ data, success, error, totalAnswers }: Props) => {
+const GetAllAnswers = ({ page, isNext, data, success, error, totalAnswers }: Props) => {
     return (
         <div className="mt-11">
             <div className="flex items-center justify-between">
@@ -34,6 +37,7 @@ const GetAllAnswers = ({ data, success, error, totalAnswers }: Props) => {
                     answers.map((answer) => <AnswerCard key={answer._id} {...answer} />)
                 }
             />
+            <Pagination page={page} isNext={isNext} />
         </div>
     );
 };
