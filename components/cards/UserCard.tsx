@@ -11,7 +11,7 @@ const UserCard = ({ _id, name, image, username }: User) => (
                 id={_id}
                 name={name}
                 imageUrl={image}
-                className="size-25 rounded-tl-2xl object-cover overflow-hidden"
+                className="size-25 rounded-full object-cover overflow-hidden"
                 fallbackClassName="text-3xl tracking-widest"
             />
 
