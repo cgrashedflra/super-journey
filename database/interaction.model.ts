@@ -1,23 +1,39 @@
-import { Schema, model, models, Types } from "mongoose";
+import { Schema, models, model, Types, Document } from "mongoose";
 
-export interface IInteractions {
-user: Types.ObjectId;
-    action: string;
-    actionId: Types.ObjectId,
-    actionType: "question" | "answer";
-} 
+export interface IInteraction {
+  user: Types.ObjectId;
+  action: string;
+  actionId: Types.ObjectId;
+  actionType: string;
+}
 
-const InteractionsSchema = new Schema(
-    {
-    user: {type: Schema.Types.ObjectId, ref: "User", required: true},
-    action: {type: String, required: true },
-    actionId: {type: Schema.Types.ObjectId, required: true},
-    actionType: {type: String, enum: ["question", "answer" ], required: true },
+export const InteractionActionEnums = [
+  "view",
+  "upvote",
+  "downvote",
+  "bookmark",
+  "post",
+  "edit",
+  "delete",
+  "search",
+] as const;
+
+export interface IInteractionDoc extends IInteraction, Document {}
+const InteractionSchema = new Schema<IInteraction>(
+  {
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    action: {
+      type: String,
+      enum: InteractionActionEnums,
+      required: true,
     },
-    { timestamps: true }
-)
+    actionId: { type: Schema.Types.ObjectId, required: true }, // 'questionId', 'answerId',
+    actionType: { type: String, enum: ["question", "answer"], required: true },
+  },
+  { timestamps: true }
+);
 
-const Interactions =
-  models.Interactions || model<IInteractions>("Interactions", InteractionsSchema);
+const Interaction =
+  models?.Interaction || model<IInteraction>("Interaction", InteractionSchema);
 
-export default Interactions;
+export default Interaction;

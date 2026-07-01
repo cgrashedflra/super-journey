@@ -21,6 +21,8 @@ import Vote from "@/database/vote.model";
 import { revalidatePath } from "next/dist/server/web/spec-extension/revalidate";
 import Answer from "@/database/answer.model";
 import Collection from "@/database/collection.model";
+import { createInteraction } from "./interaction.action";
+import { after } from "next/server";
 
 export async function createQuestion(
   params: CreateQuestionParams
@@ -75,6 +77,15 @@ export async function createQuestion(
       { $push: { tags: { $each: tagIds } } },
       { session }
     );
+
+      after(async () => {
+      await createInteraction({
+        action: "post",
+        actionId: question._id.toString(),
+        actionTarget: "question",
+        authorId: userId as string,
+      });
+    });
 
     await session.commitTransaction();
 

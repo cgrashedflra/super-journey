@@ -10,6 +10,8 @@ import Answer,{ IAnswerDoc } from "@/database/answer.model";
 import action from "../handlers/action";
 import handleError from "../handlers/error";
 import { AnswerServerSchema, DeleteAnswerSchema, GetAnswersSchema } from "../validations";
+import { createInteraction } from "./interaction.action";
+import { after } from "next/server";
 
 export async function createAnswer(
   params: CreateAnswerParams
@@ -50,6 +52,15 @@ export async function createAnswer(
 
     question.answers += 1;
     await question.save({ session });
+
+      after(async () => {
+      await createInteraction({
+        action: "post",
+        actionId: newAnswer._id.toString(),
+        actionTarget: "answer",
+        authorId: userId as string,
+      });
+    });
 
     await session.commitTransaction();
 
