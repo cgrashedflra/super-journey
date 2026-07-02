@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 
 import TagCard from "@/components/cards/TagCard";
 import { Preview } from "@/components/editor/Preview";
