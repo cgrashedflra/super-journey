@@ -17,6 +17,22 @@ import { getQuestion, incrementViews } from "@/lib/action/question.action";
 import { hasVoted } from "@/lib/action/vote.action";
 import { formatNumber, getTimeStamp } from "@/lib/utils";
 import GetAllAnswers from "@/components/answers/GetAllAnswers";
+import { Metadata } from "next/dist/lib/metadata/types/metadata-interface";
+
+export async function generateMetadata({
+    params,
+}: RouteParams): Promise<Metadata> {
+    const { id } = await params;
+
+    const { success, data: question } = await getQuestion({ questionId: id });
+
+    if (!success || !question) return {};
+
+    return {
+        title: question.title,
+        description: question.content.slice(0, 100)
+    };
+}
 
 const QuestionDetails = async ({ params, searchParams }: RouteParams) => {
     const { id } = await params;
