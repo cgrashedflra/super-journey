@@ -10,7 +10,7 @@ import {
   SubmitHandler,
   useForm,
 } from "react-hook-form";
-import { z, ZodType } from "zod";
+import { ZodType } from "zod";
 
 import { Button } from "@/components/ui/button";
 
@@ -27,8 +27,8 @@ import ROUTES from "@/constants/routes";
 import { toast } from "sonner";
 
 interface FormProps<T extends FieldValues> {
-  schema: ZodType<T>;
-  defaultValues: T;
+  schema: ZodType<T, T>;
+  defaultValues: DefaultValues<T>;
   onSubmit: (data: T) => Promise<ActionResponse>;
   formType: "SIGN_IN" | "SIGN_UP";
 }
@@ -41,9 +41,9 @@ const AuthForm = <T extends FieldValues>({
 }: FormProps<T>) => {
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof schema>>({
+  const form = useForm<T>({
     resolver: standardSchemaResolver(schema),
-    defaultValues: defaultValues as DefaultValues<T>,
+    defaultValues,
   });
 
   const handleSubmit: SubmitHandler<T> = async (data) => {
